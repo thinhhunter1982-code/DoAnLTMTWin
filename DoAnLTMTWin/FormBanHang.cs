@@ -1,5 +1,4 @@
-﻿
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Windows.Forms;
@@ -16,6 +15,9 @@ namespace DoAnLTMTWin
 
         private Button? nutLuu;
         private string chuNutLuuGoc = "Cập nhật hóa đơn";
+
+        private bool daLoadForm = false;
+        private int? maDienThoaiChoThem = null;
 
         public FormBanHang()
         {
@@ -53,6 +55,58 @@ namespace DoAnLTMTWin
             TaiDuLieuComboBox();
             CapNhatTongTien();
             CapNhatNutLuu();
+
+            daLoadForm = true;
+
+            if (maDienThoaiChoThem != null)
+            {
+                int ma = maDienThoaiChoThem.Value;
+                maDienThoaiChoThem = null;
+
+                ThemDienThoaiVaoHoaDon(ma);
+            }
+        }
+
+        public void ThemDienThoaiTuDanhSach(int maDienThoai)
+        {
+            if (maDienThoai <= 0)
+                return;
+
+            if (!daLoadForm)
+            {
+                maDienThoaiChoThem = maDienThoai;
+                return;
+            }
+
+            ThemDienThoaiVaoHoaDon(maDienThoai);
+        }
+
+        private void ThemDienThoaiVaoHoaDon(int maDienThoai)
+        {
+            if (comboBox3.DataSource == null)
+            {
+                MessageBox.Show("Danh sách điện thoại chưa được tải.");
+                return;
+            }
+
+            comboBox3.SelectedValue = maDienThoai;
+
+            if (comboBox3.SelectedItem is not DienThoai dienThoai)
+            {
+                MessageBox.Show("Không tìm thấy điện thoại.");
+                return;
+            }
+
+            if (dienThoai.SoLuongTon <= 0)
+            {
+                MessageBox.Show("Điện thoại này đã hết hàng.");
+                return;
+            }
+
+            maDienThoaiDangSua = null;
+
+            textBox1.Text = "1";
+            textBox2.Text = dienThoai.GiaBan.ToString("0.##");
         }
 
         private void CauHinhDataGridView()
@@ -64,6 +118,8 @@ namespace DoAnLTMTWin
             dataGridView1.SelectionMode =
                 DataGridViewSelectionMode.FullRowSelect;
             dataGridView1.MultiSelect = false;
+            dataGridView1.AutoSizeColumnsMode =
+                DataGridViewAutoSizeColumnsMode.Fill;
 
             dataGridView1.Columns.Add(new DataGridViewTextBoxColumn
             {
@@ -75,18 +131,37 @@ namespace DoAnLTMTWin
 
             dataGridView1.Columns.Add(new DataGridViewTextBoxColumn
             {
+                Name = "colNgayNhap",
+                HeaderText = "Ngày nhập",
+                DataPropertyName = "NgayNhap"
+            });
+
+            dataGridView1.Columns.Add(new DataGridViewTextBoxColumn
+            {
+                Name = "colNhanVien",
+                HeaderText = "Nhân viên thanh toán",
+                DataPropertyName = "NhanVien"
+            });
+
+            dataGridView1.Columns.Add(new DataGridViewTextBoxColumn
+            {
+                Name = "colKhachHang",
+                HeaderText = "Khách hàng",
+                DataPropertyName = "KhachHang"
+            });
+
+            dataGridView1.Columns.Add(new DataGridViewTextBoxColumn
+            {
                 Name = "colTenDienThoai",
                 HeaderText = "Điện Thoại",
-                DataPropertyName = "TenDienThoai",
-                Width = 220
+                DataPropertyName = "TenDienThoai"
             });
 
             dataGridView1.Columns.Add(new DataGridViewTextBoxColumn
             {
                 Name = "colSoLuong",
                 HeaderText = "Số Lượng",
-                DataPropertyName = "SoLuong",
-                Width = 120
+                DataPropertyName = "SoLuong"
             });
 
             dataGridView1.Columns.Add(new DataGridViewTextBoxColumn
@@ -94,17 +169,14 @@ namespace DoAnLTMTWin
                 Name = "colDonGia",
                 HeaderText = "Đơn Giá",
                 DataPropertyName = "DonGia",
-                Width = 150,
                 DefaultCellStyle = { Format = "N0" }
             });
 
             dataGridView1.Columns.Add(new DataGridViewTextBoxColumn
             {
-                Name = "colThanhTien",
-                HeaderText = "Thành Tiền",
-                DataPropertyName = "ThanhTien",
-                Width = 170,
-                DefaultCellStyle = { Format = "N0" }
+                Name = "colBaoHanh",
+                HeaderText = "Thời gian bảo hành (Tháng)",
+                DataPropertyName = "BaoHanh"
             });
         }
 
@@ -181,8 +253,7 @@ namespace DoAnLTMTWin
             if (!decimal.TryParse(textBox2.Text.Trim(), out donGia)
                 || donGia <= 0)
             {
-                MessageBox.Show(
-                    "Đơn giá phải lớn hơn 0.");
+                MessageBox.Show("Đơn giá phải lớn hơn 0.");
                 textBox2.Focus();
                 return false;
             }
@@ -243,9 +314,7 @@ namespace DoAnLTMTWin
 
             if (maDienThoaiDangSua != null)
             {
-                if (!ApDungSuaDongDangChon())
-                    return;
-
+                ApDungSuaDongDangChon();
                 return;
             }
 
@@ -290,8 +359,7 @@ namespace DoAnLTMTWin
 
                     int soLuongCu = chiTietCu?.SoLuong ?? 0;
 
-                    if (soLuong > dienThoaiTrongSql.SoLuongTon
-                        + soLuongCu)
+                    if (soLuong > dienThoaiTrongSql.SoLuongTon + soLuongCu)
                     {
                         MessageBox.Show(
                             "Số lượng vượt quá tồn kho có thể sử dụng.");
@@ -417,10 +485,13 @@ namespace DoAnLTMTWin
                 .Select(x => new
                 {
                     x.MaDienThoai,
+                    NgayNhap = dateTimePicker1.Value.ToString("dd/MM/yyyy"),
+                    NhanVien = comboBox2.Text,
+                    KhachHang = comboBox1.Text,
                     TenDienThoai = x.DienThoai?.TenDienThoai ?? "",
                     x.SoLuong,
                     x.DonGia,
-                    x.ThanhTien
+                    BaoHanh = x.DienThoai?.ThoiGianBaoHanh
                 })
                 .ToList();
 
@@ -464,7 +535,8 @@ namespace DoAnLTMTWin
                     Convert.ToString(comboBox2.SelectedValue),
                     out int maNhanVien))
             {
-                MessageBox.Show("Thông tin khách hàng hoặc nhân viên không hợp lệ.");
+                MessageBox.Show(
+                    "Thông tin khách hàng hoặc nhân viên không hợp lệ.");
                 return;
             }
 
@@ -543,7 +615,7 @@ namespace DoAnLTMTWin
                 {
                     NgayLap = dateTimePicker1.Value,
                     TongTien = tongTien,
-                    TrangThai = "Hoàn thành",
+                    TrangThai = "Chờ thanh toán",
                     MaKhachHang = maKhachHang,
                     MaNhanVien = maNhanVien
                 };
@@ -576,9 +648,7 @@ namespace DoAnLTMTWin
                     $"Lưu hóa đơn thành công!\n" +
                     $"Mã hóa đơn: {hoaDon.MaHoaDon}\n" +
                     $"Tổng tiền: {hoaDon.TongTien:N0} VNĐ\n\n" +
-                    "Dữ liệu vẫn được giữ lại trên form.\n" +
-                    "Bạn có thể chỉnh sửa chi tiết rồi bấm Cập nhật hóa đơn.\n" +
-                    "Bấm Làm mới hóa đơn để lập hóa đơn mới.",
+                    "Hóa đơn đang chờ thanh toán.",
                     "Thông báo",
                     MessageBoxButtons.OK,
                     MessageBoxIcon.Information);
@@ -619,6 +689,14 @@ namespace DoAnLTMTWin
                         "Hóa đơn không còn tồn tại trong SQL Server.");
                     transaction.Rollback();
                     LamMoiHoaDon();
+                    return;
+                }
+
+                if (hoaDon.TrangThai == "Đã thanh toán")
+                {
+                    MessageBox.Show(
+                        "Hóa đơn đã thanh toán, không thể cập nhật.");
+                    transaction.Rollback();
                     return;
                 }
 
@@ -775,6 +853,57 @@ namespace DoAnLTMTWin
             dataGridView1.DataSource = null;
 
             CapNhatTongTien();
+        }
+
+        // Thanh toán QR
+        private void btnThanhToanQR_Click(object sender, EventArgs e)
+        {
+            if (maHoaDonDaLuu == null)
+            {
+                MessageBox.Show(
+                    "Vui lòng bấm Cập nhật hóa đơn để lưu hóa đơn trước.");
+                return;
+            }
+
+            decimal tongTien = danhSachChiTiet.Sum(x => x.ThanhTien);
+
+            if (tongTien <= 0)
+            {
+                MessageBox.Show("Tổng tiền hóa đơn không hợp lệ.");
+                return;
+            }
+
+            using (var db = new AppDbContext())
+            {
+                var hoaDon = db.HoaDons
+                    .FirstOrDefault(x => x.MaHoaDon == maHoaDonDaLuu.Value);
+
+                if (hoaDon == null)
+                {
+                    MessageBox.Show("Không tìm thấy hóa đơn.");
+                    return;
+                }
+
+                if (hoaDon.TrangThai == "Đã thanh toán")
+                {
+                    MessageBox.Show("Hóa đơn này đã thanh toán rồi.");
+                    return;
+                }
+
+                if (hoaDon.TrangThai == "Đã hủy")
+                {
+                    MessageBox.Show("Hóa đơn đã hủy, không thể thanh toán.");
+                    return;
+                }
+
+                tongTien = hoaDon.TongTien;
+            }
+
+            using (FormThanhToanQR formQR =
+                new FormThanhToanQR(maHoaDonDaLuu.Value, tongTien))
+            {
+                formQR.ShowDialog(this);
+            }
         }
     }
 }

@@ -1,5 +1,4 @@
-﻿
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
@@ -17,6 +16,7 @@ namespace DoAnLTMTWin
         private TextBox? txtGia;
         private TextBox? txtSoLuong;
         private TextBox? txtMaLoai;
+        private TextBox? txtBaoHanh;
 
         private bool dangNap;
 
@@ -51,14 +51,11 @@ namespace DoAnLTMTWin
                 CauHinhBang();
                 CapNhatQuyen();
                 TaiDanhSach();
+                XoaTrang();
             }
             catch (Exception ex)
             {
-                MessageBox.Show(
-                    "Không thể khởi tạo form điện thoại.\n\n" + ex.Message,
-                    "Lỗi",
-                    MessageBoxButtons.OK,
-                    MessageBoxIcon.Error);
+                MessageBox.Show("Lỗi khởi tạo form:\n" + ex.Message);
             }
         }
 
@@ -69,8 +66,7 @@ namespace DoAnLTMTWin
             dgv = controls.OfType<DataGridView>().FirstOrDefault();
 
             if (dgv == null)
-                throw new InvalidOperationException(
-                    "Không tìm thấy DataGridView trên form.");
+                throw new Exception("Không tìm thấy DataGridView.");
 
             GroupBox? khung = controls.OfType<GroupBox>()
                 .FirstOrDefault(g => g.Text.Contains(
@@ -78,18 +74,25 @@ namespace DoAnLTMTWin
                     StringComparison.OrdinalIgnoreCase));
 
             if (khung == null)
-                throw new InvalidOperationException(
-                    "Không tìm thấy khung QUẢN LÝ ĐIỆN THOẠI.");
+                throw new Exception("Không tìm thấy GroupBox quản lý điện thoại.");
 
+            // textBox1 là ô thời gian bảo hành.
+            txtBaoHanh = controls.OfType<TextBox>()
+                .FirstOrDefault(t => t.Name == "textBox1");
+
+            if (txtBaoHanh == null)
+                throw new Exception("Không tìm thấy textBox1 bảo hành.");
+
+            // Lấy 6 TextBox còn lại, không lấy textBox1.
             List<TextBox> oNhap = LayTatCaControl(khung)
                 .OfType<TextBox>()
+                .Where(t => t.Name != "textBox1")
                 .OrderBy(t => t.Top)
                 .ThenBy(t => t.Left)
                 .ToList();
 
             if (oNhap.Count < 6)
-                throw new InvalidOperationException(
-                    "Không tìm thấy đủ 6 TextBox nhập liệu.");
+                throw new Exception("Không tìm thấy đủ TextBox nhập liệu.");
 
             txtMaLoai = oNhap[0];
             txtTen = oNhap[1];
@@ -104,16 +107,12 @@ namespace DoAnLTMTWin
 
         private void CauHinhBang()
         {
-            if (dgv == null)
-                return;
-
-            dgv.AutoGenerateColumns = true;
+            dgv!.AutoGenerateColumns = true;
             dgv.AllowUserToAddRows = false;
             dgv.ReadOnly = true;
             dgv.MultiSelect = false;
             dgv.SelectionMode = DataGridViewSelectionMode.FullRowSelect;
-            dgv.AutoSizeColumnsMode =
-                DataGridViewAutoSizeColumnsMode.Fill;
+            dgv.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill;
             dgv.RowHeadersVisible = false;
         }
 
@@ -134,23 +133,13 @@ namespace DoAnLTMTWin
                 }
             }
 
-            if (txtMaLoai != null)
-                txtMaLoai.ReadOnly = !LaAdmin;
-
-            if (txtTen != null)
-                txtTen.ReadOnly = !LaAdmin;
-
-            if (txtHang != null)
-                txtHang.ReadOnly = !LaAdmin;
-
-            if (txtMau != null)
-                txtMau.ReadOnly = !LaAdmin;
-
-            if (txtGia != null)
-                txtGia.ReadOnly = !LaAdmin;
-
-            if (txtSoLuong != null)
-                txtSoLuong.ReadOnly = !LaAdmin;
+            txtMaLoai!.ReadOnly = !LaAdmin;
+            txtTen!.ReadOnly = !LaAdmin;
+            txtHang!.ReadOnly = !LaAdmin;
+            txtMau!.ReadOnly = !LaAdmin;
+            txtGia!.ReadOnly = !LaAdmin;
+            txtSoLuong!.ReadOnly = !LaAdmin;
+            txtBaoHanh!.ReadOnly = !LaAdmin;
         }
 
         private bool KiemTraQuyenAdmin()
@@ -169,16 +158,13 @@ namespace DoAnLTMTWin
 
         private void TaiDanhSach()
         {
-            if (dgv == null)
-                return;
-
             try
             {
                 dangNap = true;
 
                 using var db = new AppDbContext();
 
-                dgv.DataSource = db.DienThoais
+                dgv!.DataSource = db.DienThoais
                     .AsNoTracking()
                     .OrderBy(d => d.MaDienThoai)
                     .Select(d => new
@@ -189,7 +175,8 @@ namespace DoAnLTMTWin
                         d.MauSac,
                         d.GiaBan,
                         d.SoLuongTon,
-                        d.MaLoai
+                        d.MaLoai,
+                        d.ThoiGianBaoHanh
                     })
                     .ToList();
 
@@ -197,11 +184,7 @@ namespace DoAnLTMTWin
             }
             catch (Exception ex)
             {
-                MessageBox.Show(
-                    "Không thể tải dữ liệu SQL Server.\n\n" + ex.Message,
-                    "Lỗi dữ liệu",
-                    MessageBoxButtons.OK,
-                    MessageBoxIcon.Error);
+                MessageBox.Show("Lỗi tải danh sách:\n" + ex.Message);
             }
             finally
             {
@@ -218,6 +201,7 @@ namespace DoAnLTMTWin
             DatCot("GiaBan", "Giá bán");
             DatCot("SoLuongTon", "Số lượng tồn");
             DatCot("MaLoai", "Mã loại");
+            DatCot("ThoiGianBaoHanh", "Thời gian bảo hành (tháng)");
 
             if (dgv?.Columns["GiaBan"] != null)
                 dgv.Columns["GiaBan"]!.DefaultCellStyle.Format = "N0";
@@ -229,38 +213,18 @@ namespace DoAnLTMTWin
                 dgv.Columns[tenCot]!.HeaderText = tieuDe;
         }
 
-        private bool KiemTraControl()
-        {
-            if (dgv != null &&
-                txtTen != null &&
-                txtHang != null &&
-                txtMau != null &&
-                txtGia != null &&
-                txtSoLuong != null &&
-                txtMaLoai != null)
-                return true;
-
-            MessageBox.Show(
-                "Không tìm thấy đầy đủ control trên form.",
-                "Lỗi giao diện",
-                MessageBoxButtons.OK,
-                MessageBoxIcon.Error);
-
-            return false;
-        }
-
         private bool KiemTraDuLieu()
         {
             if (string.IsNullOrWhiteSpace(txtTen!.Text))
             {
-                MessageBox.Show("Bạn vui lòng nhập tên điện thoại.");
+                MessageBox.Show("Vui lòng nhập tên điện thoại.");
                 txtTen.Focus();
                 return false;
             }
 
             if (string.IsNullOrWhiteSpace(txtHang!.Text))
             {
-                MessageBox.Show("Bạn vui lòng nhập hãng sản xuất.");
+                MessageBox.Show("Vui lòng nhập hãng sản xuất.");
                 txtHang.Focus();
                 return false;
             }
@@ -289,6 +253,14 @@ namespace DoAnLTMTWin
                 return false;
             }
 
+            if (!int.TryParse(txtBaoHanh!.Text.Trim(), out int baoHanh)
+                || baoHanh <= 0)
+            {
+                MessageBox.Show("Thời gian bảo hành phải là số tháng lớn hơn 0.");
+                txtBaoHanh.Focus();
+                return false;
+            }
+
             return true;
         }
 
@@ -302,12 +274,7 @@ namespace DoAnLTMTWin
 
             if (loai == null)
             {
-                MessageBox.Show(
-                    "Mã loại " + maLoai + " không tồn tại.",
-                    "Thông báo",
-                    MessageBoxButtons.OK,
-                    MessageBoxIcon.Warning);
-
+                MessageBox.Show("Mã loại không tồn tại.");
                 txtMaLoai!.Focus();
                 return false;
             }
@@ -318,14 +285,8 @@ namespace DoAnLTMTWin
                 StringComparison.OrdinalIgnoreCase))
             {
                 MessageBox.Show(
-                    "Hãng sản xuất không khớp với mã loại!\n\n" +
-                    "Mã loại: " + loai.MaLoai + "\n" +
-                    "Tên loại tương ứng: " + loai.TenLoai + "\n" +
-                    "Hãng bạn nhập: " + hangNhap + "\n\n" +
-                    "Bạn hãy nhập hãng sản xuất khớp với tên loại.",
-                    "Dữ liệu không khớp",
-                    MessageBoxButtons.OK,
-                    MessageBoxIcon.Warning);
+                    "Hãng sản xuất không khớp với tên loại: " +
+                    loai.TenLoai);
 
                 txtHang!.Focus();
                 return false;
@@ -336,10 +297,7 @@ namespace DoAnLTMTWin
 
         private void btnThem_Click(object sender, EventArgs e)
         {
-            if (!KiemTraQuyenAdmin())
-                return;
-
-            if (!KiemTraControl() || !KiemTraDuLieu())
+            if (!KiemTraQuyenAdmin() || !KiemTraDuLieu())
                 return;
 
             try
@@ -351,12 +309,6 @@ namespace DoAnLTMTWin
                 if (!KiemTraMaLoaiVaHang(db, maLoai))
                     return;
 
-                if (!db.DienThoais.Any())
-                {
-                    db.Database.ExecuteSqlRaw(
-                        "DBCC CHECKIDENT ('dbo.DienThoais', RESEED, 0)");
-                }
-
                 var dt = new DienThoai
                 {
                     TenDienThoai = txtTen!.Text.Trim(),
@@ -364,7 +316,8 @@ namespace DoAnLTMTWin
                     MauSac = GiaTriHoacNull(txtMau!.Text),
                     GiaBan = decimal.Parse(txtGia!.Text.Trim()),
                     SoLuongTon = int.Parse(txtSoLuong!.Text.Trim()),
-                    MaLoai = maLoai
+                    MaLoai = maLoai,
+                    ThoiGianBaoHanh = int.Parse(txtBaoHanh!.Text.Trim())
                 };
 
                 db.DienThoais.Add(dt);
@@ -372,30 +325,19 @@ namespace DoAnLTMTWin
 
                 MessageBox.Show(
                     "Thêm điện thoại thành công!\nMã điện thoại: " +
-                    dt.MaDienThoai,
-                    "Thông báo",
-                    MessageBoxButtons.OK,
-                    MessageBoxIcon.Information);
+                    dt.MaDienThoai);
 
-                XoaTrang();
                 TaiDanhSach();
+                XoaTrang();
             }
             catch (DbUpdateException ex)
             {
-                MessageBox.Show(
-                    "Không thể thêm điện thoại.\n\n" +
-                    ex.GetBaseException().Message,
-                    "Lỗi SQL",
-                    MessageBoxButtons.OK,
-                    MessageBoxIcon.Error);
+                MessageBox.Show("Lỗi SQL:\n" +
+                    ex.GetBaseException().Message);
             }
             catch (Exception ex)
             {
-                MessageBox.Show(
-                    "Lỗi khi thêm điện thoại.\n\n" + ex.Message,
-                    "Lỗi",
-                    MessageBoxButtons.OK,
-                    MessageBoxIcon.Error);
+                MessageBox.Show("Lỗi thêm điện thoại:\n" + ex.Message);
             }
         }
 
@@ -404,14 +346,10 @@ namespace DoAnLTMTWin
             if (!KiemTraQuyenAdmin())
                 return;
 
-            if (!KiemTraControl())
-                return;
-
             if (dgv?.CurrentRow == null ||
-                dgv.CurrentRow.IsNewRow ||
                 dgv.CurrentRow.Cells["MaDienThoai"].Value == null)
             {
-                MessageBox.Show("Bạn hãy chọn điện thoại cần sửa.");
+                MessageBox.Show("Hãy chọn điện thoại cần sửa.");
                 return;
             }
 
@@ -431,7 +369,6 @@ namespace DoAnLTMTWin
                 if (dt == null)
                 {
                     MessageBox.Show("Không tìm thấy điện thoại.");
-                    TaiDanhSach();
                     return;
                 }
 
@@ -446,30 +383,18 @@ namespace DoAnLTMTWin
                 dt.GiaBan = decimal.Parse(txtGia!.Text.Trim());
                 dt.SoLuongTon = int.Parse(txtSoLuong!.Text.Trim());
                 dt.MaLoai = maLoai;
+                dt.ThoiGianBaoHanh = int.Parse(txtBaoHanh!.Text.Trim());
 
                 db.SaveChanges();
 
                 MessageBox.Show("Sửa điện thoại thành công.");
 
-                XoaTrang();
                 TaiDanhSach();
-            }
-            catch (DbUpdateException ex)
-            {
-                MessageBox.Show(
-                    "Không thể cập nhật điện thoại.\n\n" +
-                    ex.GetBaseException().Message,
-                    "Lỗi SQL",
-                    MessageBoxButtons.OK,
-                    MessageBoxIcon.Error);
+                XoaTrang();
             }
             catch (Exception ex)
             {
-                MessageBox.Show(
-                    "Lỗi khi sửa điện thoại.\n\n" + ex.Message,
-                    "Lỗi",
-                    MessageBoxButtons.OK,
-                    MessageBoxIcon.Error);
+                MessageBox.Show("Lỗi sửa điện thoại:\n" + ex.Message);
             }
         }
 
@@ -478,14 +403,10 @@ namespace DoAnLTMTWin
             if (!KiemTraQuyenAdmin())
                 return;
 
-            if (!KiemTraControl())
-                return;
-
             if (dgv?.CurrentRow == null ||
-                dgv.CurrentRow.IsNewRow ||
                 dgv.CurrentRow.Cells["MaDienThoai"].Value == null)
             {
-                MessageBox.Show("Bạn hãy chọn điện thoại cần xóa.");
+                MessageBox.Show("Hãy chọn điện thoại cần xóa.");
                 return;
             }
 
@@ -494,7 +415,7 @@ namespace DoAnLTMTWin
 
             if (MessageBox.Show(
                 "Bạn có chắc muốn xóa điện thoại mã " + ma + " không?",
-                "Xác nhận xóa",
+                "Xác nhận",
                 MessageBoxButtons.YesNo,
                 MessageBoxIcon.Question) != DialogResult.Yes)
                 return;
@@ -509,8 +430,6 @@ namespace DoAnLTMTWin
                 if (dt == null)
                 {
                     MessageBox.Show("Điện thoại không tồn tại.");
-                    TaiDanhSach();
-                    XoaTrang();
                     return;
                 }
 
@@ -523,64 +442,38 @@ namespace DoAnLTMTWin
                 if (coHoaDon || coPhieuNhap)
                 {
                     MessageBox.Show(
-                        "Không thể xóa điện thoại đã được sử dụng " +
-                        "trong hóa đơn hoặc phiếu nhập.");
+                        "Không thể xóa điện thoại đã có trong hóa đơn hoặc phiếu nhập.");
                     return;
                 }
 
                 db.DienThoais.Remove(dt);
                 db.SaveChanges();
 
-                if (!db.DienThoais.Any())
-                {
-                    db.Database.ExecuteSqlRaw(
-                        "DBCC CHECKIDENT ('dbo.DienThoais', RESEED, 0)");
-                }
-
                 MessageBox.Show("Xóa điện thoại thành công.");
 
-                XoaTrang();
                 TaiDanhSach();
-            }
-            catch (DbUpdateException ex)
-            {
-                MessageBox.Show(
-                    "Không thể xóa điện thoại.\n\n" +
-                    ex.GetBaseException().Message,
-                    "Lỗi SQL",
-                    MessageBoxButtons.OK,
-                    MessageBoxIcon.Error);
+                XoaTrang();
             }
             catch (Exception ex)
             {
-                MessageBox.Show(
-                    "Lỗi khi xóa điện thoại.\n\n" + ex.Message,
-                    "Lỗi",
-                    MessageBoxButtons.OK,
-                    MessageBoxIcon.Error);
+                MessageBox.Show("Lỗi xóa điện thoại:\n" + ex.Message);
             }
         }
 
         private void btnLamMoi_Click(object sender, EventArgs e)
         {
-            if (!KiemTraControl())
-                return;
-
-            XoaTrang();
             TaiDanhSach();
+            XoaTrang();
         }
 
         private void btnTimKiem_Click(object sender, EventArgs e)
         {
-            if (!KiemTraControl())
-                return;
-
+            string maLoaiNhap = txtMaLoai!.Text.Trim();
             string tenNhap = txtTen!.Text.Trim();
 
-            if (string.IsNullOrWhiteSpace(tenNhap))
+            if (maLoaiNhap == "" && tenNhap == "")
             {
-                MessageBox.Show("Bạn vui lòng nhập tên điện thoại cần tìm.");
-                txtTen.Focus();
+                MessageBox.Show("Nhập mã loại hoặc tên điện thoại cần tìm.");
                 return;
             }
 
@@ -588,9 +481,28 @@ namespace DoAnLTMTWin
             {
                 using var db = new AppDbContext();
 
-                var ketQua = db.DienThoais
-                    .AsNoTracking()
-                    .Where(d => d.TenDienThoai.Contains(tenNhap))
+                var truyVan = db.DienThoais.AsNoTracking();
+
+                if (maLoaiNhap != "")
+                {
+                    if (!int.TryParse(maLoaiNhap, out int maLoai) ||
+                        maLoai <= 0)
+                    {
+                        MessageBox.Show("Mã loại không hợp lệ.");
+                        return;
+                    }
+
+                    truyVan = truyVan.Where(d => d.MaLoai == maLoai);
+                }
+                else
+                {
+                    truyVan = truyVan.Where(d =>
+                        d.TenDienThoai.Contains(tenNhap));
+                }
+
+                dangNap = true;
+
+                dgv!.DataSource = truyVan
                     .OrderBy(d => d.MaDienThoai)
                     .Select(d => new
                     {
@@ -600,24 +512,19 @@ namespace DoAnLTMTWin
                         d.MauSac,
                         d.GiaBan,
                         d.SoLuongTon,
-                        d.MaLoai
+                        d.MaLoai,
+                        d.ThoiGianBaoHanh
                     })
                     .ToList();
 
-                dangNap = true;
-                dgv!.DataSource = ketQua;
                 DatTieuDeCot();
 
-                if (ketQua.Count == 0)
-                    MessageBox.Show("Không tìm thấy điện thoại phù hợp.");
+                if (dgv.Rows.Count == 0)
+                    MessageBox.Show("Không tìm thấy điện thoại.");
             }
             catch (Exception ex)
             {
-                MessageBox.Show(
-                    "Lỗi tìm kiếm.\n\n" + ex.Message,
-                    "Lỗi",
-                    MessageBoxButtons.OK,
-                    MessageBoxIcon.Error);
+                MessageBox.Show("Lỗi tìm kiếm:\n" + ex.Message);
             }
             finally
             {
@@ -643,6 +550,7 @@ namespace DoAnLTMTWin
             txtGia!.Text = DocGiaTri(row, "GiaBan");
             txtSoLuong!.Text = DocGiaTri(row, "SoLuongTon");
             txtMaLoai!.Text = DocGiaTri(row, "MaLoai");
+            txtBaoHanh!.Text = DocGiaTri(row, "ThoiGianBaoHanh");
         }
 
         private string DocGiaTri(DataGridViewRow row, string cot)
@@ -656,17 +564,28 @@ namespace DoAnLTMTWin
 
         private void XoaTrang()
         {
-            txtTen?.Clear();
-            txtHang?.Clear();
-            txtMau?.Clear();
-            txtGia?.Clear();
-            txtSoLuong?.Clear();
-            txtMaLoai?.Clear();
+            bool trangThaiCu = dangNap;
+            dangNap = true;
 
-            if (dgv != null)
+            try
             {
-                dgv.ClearSelection();
-                dgv.CurrentCell = null;
+                txtTen?.Clear();
+                txtHang?.Clear();
+                txtMau?.Clear();
+                txtGia?.Clear();
+                txtSoLuong?.Clear();
+                txtMaLoai?.Clear();
+                txtBaoHanh?.Clear();
+
+                if (dgv != null)
+                {
+                    dgv.ClearSelection();
+                    dgv.CurrentCell = null;
+                }
+            }
+            finally
+            {
+                dangNap = trangThaiCu;
             }
 
             txtTen?.Focus();
@@ -676,6 +595,36 @@ namespace DoAnLTMTWin
         {
             value = value.Trim();
             return string.IsNullOrWhiteSpace(value) ? null : value;
+        }
+
+        private void btnMua_Click(object sender, EventArgs e)
+        {
+            // Kiểm tra đã chọn điện thoại chưa.
+            if (dgv?.CurrentRow == null ||
+                dgv.CurrentRow.Cells["MaDienThoai"].Value == null)
+            {
+                MessageBox.Show("Vui lòng chọn điện thoại cần mua.");
+                return;
+            }
+
+            // Lấy mã điện thoại đang chọn.
+            int maDienThoai = Convert.ToInt32(
+                dgv.CurrentRow.Cells["MaDienThoai"].Value);
+
+            // Tìm Form chính.
+            FormQuanLyCuaHangDienThoai? formChinh =
+                Application.OpenForms
+                .OfType<FormQuanLyCuaHangDienThoai>()
+                .FirstOrDefault();
+
+            if (formChinh == null)
+            {
+                MessageBox.Show("Không tìm thấy Form chính.");
+                return;
+            }
+
+            // Gửi mã điện thoại sang Form bán hàng.
+            formChinh.MoFormBanHang(maDienThoai);
         }
     }
 }

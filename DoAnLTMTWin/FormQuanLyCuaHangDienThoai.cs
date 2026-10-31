@@ -1,4 +1,3 @@
-
 using System;
 using System.Linq;
 using System.Collections.Generic;
@@ -21,39 +20,25 @@ namespace DoAnLTMTWin
             !string.IsNullOrWhiteSpace(vaiTro);
 
         private bool LaAdmin =>
-            string.Equals(
-                vaiTro?.Trim(),
-                "Admin",
+            string.Equals(vaiTro?.Trim(), "Admin",
                 StringComparison.OrdinalIgnoreCase);
 
         private bool LaAdminTamThoi =>
-            string.Equals(
-                vaiTro?.Trim(),
-                "AdminTamThoi",
+            string.Equals(vaiTro?.Trim(), "AdminTamThoi",
                 StringComparison.OrdinalIgnoreCase) ||
-            string.Equals(
-                vaiTro?.Trim(),
-                "Admin (Tạm thời)",
+            string.Equals(vaiTro?.Trim(), "Admin (Tạm thời)",
                 StringComparison.OrdinalIgnoreCase);
 
         private bool LaNhanVien =>
-            string.Equals(
-                vaiTro?.Trim(),
-                "Nhân viên",
+            string.Equals(vaiTro?.Trim(), "Nhân viên",
                 StringComparison.OrdinalIgnoreCase) ||
-            string.Equals(
-                vaiTro?.Trim(),
-                "NhanVien",
+            string.Equals(vaiTro?.Trim(), "NhanVien",
                 StringComparison.OrdinalIgnoreCase);
 
         private bool LaKhachHang =>
-            string.Equals(
-                vaiTro?.Trim(),
-                "Khách hàng",
+            string.Equals(vaiTro?.Trim(), "Khách hàng",
                 StringComparison.OrdinalIgnoreCase) ||
-            string.Equals(
-                vaiTro?.Trim(),
-                "KhachHang",
+            string.Equals(vaiTro?.Trim(), "KhachHang",
                 StringComparison.OrdinalIgnoreCase);
 
         public FormQuanLyCuaHangDienThoai()
@@ -80,8 +65,7 @@ namespace DoAnLTMTWin
         }
 
         private void FormQuanLyCuaHangDienThoai_Load(
-            object? sender,
-            EventArgs e)
+            object? sender, EventArgs e)
         {
             TimPanelNoiDung();
 
@@ -141,27 +125,21 @@ namespace DoAnLTMTWin
 
         private string ChuanHoaVaiTro(string role)
         {
-            if (string.Equals(
-                role, "AdminTamThoi",
+            if (string.Equals(role, "AdminTamThoi",
                 StringComparison.OrdinalIgnoreCase) ||
-                string.Equals(
-                role, "Admin (Tạm thời)",
+                string.Equals(role, "Admin (Tạm thời)",
                 StringComparison.OrdinalIgnoreCase))
                 return "Admin (Tạm thời)";
 
-            if (string.Equals(
-                role, "NhanVien",
+            if (string.Equals(role, "NhanVien",
                 StringComparison.OrdinalIgnoreCase) ||
-                string.Equals(
-                role, "Nhân viên",
+                string.Equals(role, "Nhân viên",
                 StringComparison.OrdinalIgnoreCase))
                 return "Nhân viên";
 
-            if (string.Equals(
-                role, "KhachHang",
+            if (string.Equals(role, "KhachHang",
                 StringComparison.OrdinalIgnoreCase) ||
-                string.Equals(
-                role, "Khách hàng",
+                string.Equals(role, "Khách hàng",
                 StringComparison.OrdinalIgnoreCase))
                 return "Khách hàng";
 
@@ -176,6 +154,7 @@ namespace DoAnLTMTWin
             label17.Text = "0";
         }
 
+
         private void CapNhatThongKe()
         {
             try
@@ -185,21 +164,27 @@ namespace DoAnLTMTWin
 
                 using var db = new AppDbContext();
 
+                // 1. Tổng số điện thoại
                 int tongDienThoai = db.DienThoais.Count();
 
+                // 2. Số hóa đơn được lập hôm nay
                 int hoaDonHomNay = db.HoaDons.Count(h =>
                     h.NgayLap >= homNay &&
                     h.NgayLap < ngayMai);
 
+                // 3. Tổng số khách hàng
                 int tongKhachHang = db.KhachHangs.Count();
 
+                // 4. Tổng doanh thu hôm nay
+                // Chỉ tính hóa đơn đã thanh toán
                 decimal doanhThuHomNay = db.HoaDons
                     .Where(h =>
                         h.NgayLap >= homNay &&
                         h.NgayLap < ngayMai &&
-                        h.TrangThai == "Hoàn thành")
+                        h.TrangThai == "Đã thanh toán")
                     .Sum(h => (decimal?)h.TongTien) ?? 0m;
 
+                // 5. Hiển thị lên giao diện trang chủ
                 label8.Text = tongDienThoai.ToString("N0");
                 label11.Text = hoaDonHomNay.ToString("N0");
                 label14.Text = tongKhachHang.ToString("N0");
@@ -257,11 +242,7 @@ namespace DoAnLTMTWin
             }
 
             if (LaNhanVien)
-            {
-                // Nhân viên được truy cập các chức năng.
-                // Quyền sửa dữ liệu phải được kiểm soát ở từng form.
                 return true;
-            }
 
             if (LaKhachHang)
             {
@@ -364,7 +345,6 @@ namespace DoAnLTMTWin
                 return;
             }
 
-            // Truyền vai trò sang các form con có hỗ trợ.
             if (formMoi is FormDienThoai fdt)
                 fdt.VaiTroNguoiDung = vaiTro;
 
@@ -427,6 +407,28 @@ namespace DoAnLTMTWin
 
             formMoi.Show();
             formMoi.BringToFront();
+        }
+
+        // Mở Form bán hàng và truyền mã điện thoại được chọn.
+        public void MoFormBanHang(int maDienThoai)
+        {
+            if (!KiemTraQuyen("Bán hàng"))
+                return;
+
+            // Mở hoặc đưa Form bán hàng đang mở lên trước.
+            MoForm(new FormBanHang(), "Bán hàng");
+
+            // Lấy đúng Form bán hàng đang được quản lý.
+            if (cacFormDangMo.TryGetValue(
+                typeof(FormBanHang), out Form? form))
+            {
+                if (form is FormBanHang formBanHang &&
+                    !formBanHang.IsDisposed)
+                {
+                    formBanHang.ThemDienThoaiTuDanhSach(maDienThoai);
+                    formBanHang.BringToFront();
+                }
+            }
         }
 
         private void MoFormQuanLyTaiKhoan()

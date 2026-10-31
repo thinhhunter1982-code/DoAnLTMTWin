@@ -442,6 +442,20 @@ namespace DoAnLTMTWin
             {
                 using AppDbContext db = new AppDbContext();
 
+                // Không cho trùng họ tên.
+                if (db.KhachHangs.Any(x => x.TenKhachHang == hoTen))
+                {
+                    MessageBox.Show(
+                        "Họ tên khách hàng đã tồn tại.",
+                        "Trùng họ tên",
+                        MessageBoxButtons.OK,
+                        MessageBoxIcon.Warning);
+
+                    txtHoTen.Focus();
+                    txtHoTen.SelectAll();
+                    return;
+                }
+
                 if (sdt != "" &&
                     db.KhachHangs.Any(x => x.SoDienThoai == sdt))
                 {
@@ -524,6 +538,22 @@ namespace DoAnLTMTWin
                 {
                     MessageBox.Show("Khách hàng không còn tồn tại.");
                     TaiDanhSachKhachHang();
+                    return;
+                }
+
+                // Không cho trùng họ tên với khách hàng khác.
+                if (db.KhachHangs.Any(
+                    x => x.TenKhachHang == hoTen &&
+                         x.MaKhachHang != khachHang.MaKhachHang))
+                {
+                    MessageBox.Show(
+                        "Họ tên khách hàng đã được sử dụng.",
+                        "Trùng họ tên",
+                        MessageBoxButtons.OK,
+                        MessageBoxIcon.Warning);
+
+                    txtHoTen.Focus();
+                    txtHoTen.SelectAll();
                     return;
                 }
 

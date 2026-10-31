@@ -30,6 +30,8 @@
         {
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(FormDienThoai));
             groupBox1 = new GroupBox();
+            textBox1 = new TextBox();
+            label1 = new Label();
             textBox7 = new TextBox();
             btnThem = new Button();
             btnSua = new Button();
@@ -48,12 +50,16 @@
             label3 = new Label();
             label2 = new Label();
             dataGridView1 = new DataGridView();
+            btnMua = new Button();
             groupBox1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)dataGridView1).BeginInit();
             SuspendLayout();
             // 
             // groupBox1
             // 
+            groupBox1.Controls.Add(btnMua);
+            groupBox1.Controls.Add(textBox1);
+            groupBox1.Controls.Add(label1);
             groupBox1.Controls.Add(textBox7);
             groupBox1.Controls.Add(btnThem);
             groupBox1.Controls.Add(btnSua);
@@ -82,11 +88,28 @@
             groupBox1.TabStop = false;
             groupBox1.Text = "QUẢN LÝ ĐIỆN THOẠI";
             // 
+            // textBox1
+            // 
+            textBox1.Location = new Point(965, 78);
+            textBox1.Name = "textBox1";
+            textBox1.Size = new Size(450, 38);
+            textBox1.TabIndex = 15;
+            // 
+            // label1
+            // 
+            label1.AutoSize = true;
+            label1.Font = new Font("Segoe UI", 10.2F, FontStyle.Bold, GraphicsUnit.Point, 163);
+            label1.Location = new Point(965, 52);
+            label1.Name = "label1";
+            label1.Size = new Size(155, 23);
+            label1.TabIndex = 14;
+            label1.Text = "Thời gia bảo hành";
+            // 
             // textBox7
             // 
             textBox7.Location = new Point(29, 78);
             textBox7.Name = "textBox7";
-            textBox7.Size = new Size(715, 38);
+            textBox7.Size = new Size(450, 38);
             textBox7.TabIndex = 13;
             // 
             // btnThem
@@ -176,37 +199,37 @@
             // 
             // textBox6
             // 
-            textBox6.Location = new Point(778, 260);
+            textBox6.Location = new Point(497, 260);
             textBox6.Name = "textBox6";
-            textBox6.Size = new Size(715, 38);
+            textBox6.Size = new Size(450, 38);
             textBox6.TabIndex = 12;
             // 
             // textBox5
             // 
             textBox5.Location = new Point(29, 260);
             textBox5.Name = "textBox5";
-            textBox5.Size = new Size(715, 38);
+            textBox5.Size = new Size(450, 38);
             textBox5.TabIndex = 11;
             // 
             // textBox4
             // 
-            textBox4.Location = new Point(778, 172);
+            textBox4.Location = new Point(497, 172);
             textBox4.Name = "textBox4";
-            textBox4.Size = new Size(715, 38);
+            textBox4.Size = new Size(450, 38);
             textBox4.TabIndex = 10;
             // 
             // textBox3
             // 
             textBox3.Location = new Point(29, 172);
             textBox3.Name = "textBox3";
-            textBox3.Size = new Size(715, 38);
+            textBox3.Size = new Size(450, 38);
             textBox3.TabIndex = 9;
             // 
             // textBox2
             // 
-            textBox2.Location = new Point(778, 78);
+            textBox2.Location = new Point(497, 78);
             textBox2.Name = "textBox2";
-            textBox2.Size = new Size(715, 38);
+            textBox2.Size = new Size(450, 38);
             textBox2.TabIndex = 8;
             // 
             // label7
@@ -223,7 +246,7 @@
             // 
             label6.AutoSize = true;
             label6.Font = new Font("Segoe UI", 10.2F, FontStyle.Bold, GraphicsUnit.Point, 163);
-            label6.Location = new Point(778, 234);
+            label6.Location = new Point(497, 234);
             label6.Name = "label6";
             label6.Size = new Size(122, 23);
             label6.TabIndex = 5;
@@ -243,7 +266,7 @@
             // 
             label4.AutoSize = true;
             label4.Font = new Font("Segoe UI", 10.2F, FontStyle.Bold, GraphicsUnit.Point, 163);
-            label4.Location = new Point(778, 146);
+            label4.Location = new Point(497, 146);
             label4.Name = "label4";
             label4.Size = new Size(77, 23);
             label4.TabIndex = 3;
@@ -263,7 +286,7 @@
             // 
             label2.AutoSize = true;
             label2.Font = new Font("Segoe UI", 10.2F, FontStyle.Bold, GraphicsUnit.Point, 163);
-            label2.Location = new Point(778, 52);
+            label2.Location = new Point(497, 52);
             label2.Name = "label2";
             label2.Size = new Size(128, 23);
             label2.TabIndex = 1;
@@ -279,6 +302,19 @@
             dataGridView1.RowHeadersWidth = 51;
             dataGridView1.Size = new Size(1524, 444);
             dataGridView1.TabIndex = 6;
+            // 
+            // btnMua
+            // 
+            btnMua.BackColor = Color.LimeGreen;
+            btnMua.FlatAppearance.BorderSize = 0;
+            btnMua.FlatStyle = FlatStyle.Flat;
+            btnMua.Location = new Point(965, 172);
+            btnMua.Name = "btnMua";
+            btnMua.Size = new Size(450, 126);
+            btnMua.TabIndex = 16;
+            btnMua.Text = "Mua";
+            btnMua.UseVisualStyleBackColor = false;
+            btnMua.Click += btnMua_Click;
             // 
             // FormDienThoai
             // 
@@ -317,5 +353,8 @@
         private Button btnLamMoi;
         private Button btnTimKiem;
         private DataGridView dataGridView1;
+        private TextBox textBox1;
+        private Label label1;
+        private Button btnMua;
     }
 }

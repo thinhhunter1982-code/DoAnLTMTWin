@@ -129,16 +129,13 @@
         J88AAAAASUVORK5CYII=
 </value>
   </data>
-  <metadata name="DienThoai.UserAddedColumn" type="System.Boolean, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089">
+  <metadata name="Column1.UserAddedColumn" type="System.Boolean, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089">
     <value>True</value>
   </metadata>
-  <metadata name="SoLuong.UserAddedColumn" type="System.Boolean, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089">
+  <metadata name="Column3.UserAddedColumn" type="System.Boolean, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089">
     <value>True</value>
   </metadata>
-  <metadata name="DonGia.UserAddedColumn" type="System.Boolean, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089">
-    <value>True</value>
-  </metadata>
-  <metadata name="ThanhTien.UserAddedColumn" type="System.Boolean, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089">
+  <metadata name="Column2.UserAddedColumn" type="System.Boolean, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089">
     <value>True</value>
   </metadata>
   <metadata name="DienThoai.UserAddedColumn" type="System.Boolean, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089">
@@ -150,22 +147,26 @@
   <metadata name="DonGia.UserAddedColumn" type="System.Boolean, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089">
     <value>True</value>
   </metadata>
-  <metadata name="ThanhTien.UserAddedColumn" type="System.Boolean, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089">
+  <metadata name="Column4.UserAddedColumn" type="System.Boolean, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089">
     <value>True</value>
   </metadata>
   <data name="btnCapNhatHoaDon.Image" type="System.Drawing.Bitmap, System.Drawing" mimetype="application/x-microsoft.net.object.bytearray.base64">
     <value>
-        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
+        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
 </value>
   </data>
   <data name="btnLamMoiHoaDon.Image" type="System.Drawing.Bitmap, System.Drawing" mimetype="application/x-microsoft.net.object.bytearray.base64">
@@ -183,6 +184,23 @@
         4xtwXM6VewLuoqJdkQf1wmbPt44+IzmxKymJh8Yrv//2qUva0SG/B14UhsXgUNZZG+lWbExvg3agFMap
         76iOZCaUv7Nu01XQDRoBFmUdHSMr8MtnP3AduA888XgA3HDzWtps76Tg29GgrDz9Sd7Zo6QK0RdKA+Gg
         57pvuBVa1vV/CX8BzZkKBfdht/gAAAAASUVORK5CYII=
+</value>
+  </data>
+  <data name="btnThanhToanQR.Image" type="System.Drawing.Bitmap, System.Drawing" mimetype="application/x-microsoft.net.object.bytearray.base64">
+    <value>
+        iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAAABGdBTUEAALGPC/xhBQAAAqVJREFUWEfd
+        l99uTUEUxktd0PTCn6oiSrkm3qGXFVoqpDQlXEm8h0TccukhvAHXIiEihEQiQgXx/9JPvt1vjjnTmd29
+        zz4XYiWT2XvNfGt/a82atc4ZGYkE2NR0xLiu2H9DgM3AbmBPwzE6DGwVOs+TwFPgA/C2ZqwCL4HpyMZA
+        WBGPCYjZR5rJd2AmIjAQNkdALH8Dd4FLwGVgxbPGba9/Ag4lBFpjSwQkF6zbBezQ7PcTXi8RaIWtIyDG
+        MvAe+OF5AjiTGumCrSOg0O0Efvlds4wupEa6YOsIxF4oad6VvOiCrSOwbJ2AMjbh95OpkS7YEgFl6h2H
+        TKzDfBq4lWZyF2yOgApJE/maIdAamyOgKqUNYlkaX4A3wMGIgCpha2xFIDIyChwQO23wXBrTwJYW2FjX
+        h/3/xZ1y498AXVpqgt3qKzil52S9p4s/PIx2LONPvHYOuG87un76FaQPP7Zu3pg1B4bUjvcCn712BXjl
+        5yWv74vWL5pUlkAoJm1aqoxts+fCHAHm1BWBo7a7HThrG73IlQhIGrdU63XmCvszfdy6ceChj0Ufvwc8
+        B857/1gdgcYt1VgdgfZJVqzbD3yz7irw2s86CjWoKhdKBNq0VB2BMl9rCvuMyargiPCSj+UUcB34aRtV
+        lEsEmrTUUE777rjPWxkv7Kx1cuYB8AK4ASz2Ilgg0KSl9gj4nusYdN1UdlXzJdd8vQ/bEcliTDhHoFVL
+        NVZ1QF4r4bR31tdR9ULRCzoloAiqd6w1ooRA65ZqrLwPXi+r2fhDIipRbkinm/H3T0mGwCAtNU5C1YJj
+        wCNn+01H7rh1wi8Yt46IwqLMTVtpbsi7bEv1cYTrV523cyPoQn71E+gqdkBDVVFXTuctstKNRbrwt2x9
+        h4wyesORYgeVP89q+MwhgvhEAAAAAElFTkSuQmCC
 </value>
   </data>
 </root>

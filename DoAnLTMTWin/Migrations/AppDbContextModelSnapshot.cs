@@ -118,6 +118,9 @@ namespace DoAnLTMTWin.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<int>("ThoiGianBaoHanh")
+                        .HasColumnType("int");
+
                     b.HasKey("MaDienThoai");
 
                     b.HasIndex("MaLoai");
